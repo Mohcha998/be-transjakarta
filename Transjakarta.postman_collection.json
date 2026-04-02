@@ -1,0 +1,81 @@
+{
+  "info": {
+    "_postman_id": "6fbc1bee-6e59-42ca-95fb-78f07fd8cc02",
+    "name": "Transjakarta",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "30715822"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Last Location",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/vehicles/B1234XYZ/location",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "vehicles",
+            "B1234XYZ",
+            "location"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Location History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/vehicles/B1234XYZ/history?start=1715000000&end=1775116351",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "vehicles",
+            "B1234XYZ",
+            "history"
+          ],
+          "query": [
+            {
+              "key": "start",
+              "value": "1715000000"
+            },
+            {
+              "key": "end",
+              "value": "1775116351"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

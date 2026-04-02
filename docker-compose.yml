@@ -1,0 +1,118 @@
+services:
+
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fleet
+    ports:
+      - "5432:5432"
+    networks:
+      - fleet-net
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d fleet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mqtt:
+    image: eclipse-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - fleet-net
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z localhost 1883"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    depends_on:
+      mqtt:
+        condition: service_healthy
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - fleet-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: ./go-app
+    restart: unless-stopped
+    env_file:
+      - ./go-app/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - fleet-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  subs:
+    build: ./go-subs
+    restart: unless-stopped
+    env_file:
+      - ./go-subs/.env
+    depends_on:
+      mqtt:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - fleet-net
+
+  worker:
+    build: ./go-worker
+    restart: unless-stopped
+    env_file:
+      - ./go-worker/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - fleet-net
+
+  publish:
+    build: ./go-publish
+    restart: unless-stopped
+    env_file:
+      - ./go-publish/.env
+    depends_on:
+      mqtt:
+        condition: service_healthy
+    networks:
+      - fleet-net
+
+networks:
+  fleet-net:
+    driver: bridge
+
+volumes:
+  pgdata:
