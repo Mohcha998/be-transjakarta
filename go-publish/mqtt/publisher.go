@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -11,7 +12,9 @@ func Start() {
 
 	opts := mqtt.NewClientOptions().AddBroker("tcp://mqtt:1883")
 	client := mqtt.NewClient(opts)
-	client.Connect()
+
+	token := client.Connect()
+	token.Wait()
 
 	for {
 		data := map[string]interface{}{
@@ -22,6 +25,8 @@ func Start() {
 		}
 
 		payload, _ := json.Marshal(data)
+
+		log.Println("Publising:", string(payload))
 
 		client.Publish("/fleet/vehicle/B1234XYZ/location", 0, false, payload)
 
