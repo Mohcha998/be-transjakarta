@@ -132,12 +132,11 @@ func Start(db *gorm.DB, url string) {
 			continue
 		}
 
-		log.Println("🚨 GEOFENCE EVENT")
+		log.Println("GEOFENCE EVENT")
 		log.Println("Vehicle:", vehicleID)
 		log.Println("Event:", event)
 		log.Println("Location:", lat, lon)
 		log.Println("Time:", ts)
-		log.Println("✅ Saved to DB")
 
 		m.Ack(false)
 	}
